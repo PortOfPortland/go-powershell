@@ -7,6 +7,7 @@ import (
 	"io"
 	"strings"
 	"sync"
+	"runtime"
 
 	"github.com/portofportland/go-powershell/backend"
 	"github.com/portofportland/go-powershell/utils"
@@ -28,7 +29,15 @@ type shell struct {
 }
 
 func New(backend backend.Starter) (Shell, error) {
-	handle, stdin, stdout, stderr, err := backend.StartProcess("powershell.exe", "-NoExit", "-Command", "-")
+	var pscommand string
+
+	if runtime.GOOS == "windows" {
+			pscommand = "powershell.exe"
+	} else {
+			pscommand = "pwsh"
+	}
+
+	handle, stdin, stdout, stderr, err := backend.StartProcess(pscommand, "-NoExit", "-Command", "-")
 	if err != nil {
 		return nil, err
 	}
